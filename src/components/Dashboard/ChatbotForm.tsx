@@ -1,26 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ChatbotConfig } from '../../types';
+import WidgetCodeGenerator from '../Widget/WidgetCodeGenerator';
 
 interface ChatbotFormProps {
-  chatbot: Partial<ChatbotConfig>;
-  onUpdate: (chatbot: Partial<ChatbotConfig>) => void;
+  bot: Partial<ChatbotConfig> | null;
+  onSubmit: (chatbot: Partial<ChatbotConfig>) => void;
   onCancel: () => void;
-  onTest: () => void;
-  onGetWidgetCode: () => void;
 }
 
-export default function ChatbotForm({ 
-  chatbot, 
-  onUpdate, 
-  onCancel, 
-  onTest,
-  onGetWidgetCode 
-}: ChatbotFormProps) {
-  const [formData, setFormData] = React.useState(chatbot);
+export default function ChatbotForm({ bot, onSubmit, onCancel }: ChatbotFormProps) {
+  const [formData, setFormData] = useState({
+    botName: '',
+    promptText: '',
+    introMessage: '',
+    calendarType: 'Calendly info@connectortq.com',
+    eventType: 'Demo Call',
+    eventSchedule: '',
+    appearance: {
+      fontSize: 16,
+      fontFamily: 'system-ui',
+      subheading: 'Available',
+      chatInputPlaceholder: 'Ask me anything...',
+      chatbotIcon: 'Robot',
+      sendMessageButton: 'Paper Plane',
+      titleColor: '#4F46E5',
+      inputTextColor: '#000000',
+      backgroundColor: '#FFFFFF',
+    },
+    ...bot
+  });
+
+  const [showWidgetCode, setShowWidgetCode] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(formData);
+    onSubmit(formData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -32,71 +46,79 @@ export default function ChatbotForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Bot Configuration</h2>
-        <input
-          type="text"
-          name="name"
-          value={formData.name || ''}
-          onChange={handleChange}
-          placeholder="Bot Name"
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Configure Chatbot</h1>
+          <div className="space-x-4">
+            <button
+              onClick={() => setShowWidgetCode(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Get Widget Code
+            </button>
+            <button className="px-4 py-1 bg-white text-black rounded-full border hover:bg-gray-50">
+              Subscribe now
+            </button>
+          </div>
+        </div>
 
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Greeting Message</h2>
-        <textarea
-          name="greeting"
-          value={formData.messages?.greeting || ''}
-          onChange={handleChange}
-          placeholder="Enter greeting message"
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={3}
-        />
-      </div>
+        {showWidgetCode ? (
+          <WidgetCodeGenerator settings={formData.appearance} botId={formData.id || 'preview'} />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block font-semibold mb-2">Bot Name</label>
+              <input
+                type="text"
+                name="botName"
+                value={formData.botName}
+                onChange={handleChange}
+                className="w-full p-2 border rounded-lg"
+                required
+              />
+            </div>
 
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Calendar Integration</h2>
-        <select 
-          name="calendarType"
-          onChange={handleChange}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="calendly">Calendly</option>
-        </select>
-      </div>
+            <div>
+              <label className="block font-semibold mb-2">Prompt Text</label>
+              <textarea
+                name="promptText"
+                value={formData.promptText}
+                onChange={handleChange}
+                className="w-full p-2 border rounded-lg h-32"
+                required
+              />
+            </div>
 
-      <div className="flex justify-between pt-6">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={onTest}
-          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-        >
-          Test Bot
-        </button>
-        <button
-          type="button"
-          onClick={onGetWidgetCode}
-          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-        >
-          Get Widget Code
-        </button>
-        <button
-          type="submit"
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Save Changes
-        </button>
+            <div>
+              <label className="block font-semibold mb-2">Intro Message</label>
+              <input
+                type="text"
+                name="introMessage"
+                value={formData.introMessage}
+                onChange={handleChange}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        )}
       </div>
-    </form>
+    </div>
   );
 }

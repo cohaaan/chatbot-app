@@ -1,40 +1,54 @@
-import React, { useState } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
 import Overview from './pages/Overview';
 import Chats from './pages/Chats';
 import Integrations from './pages/Integrations';
 import Playground from './pages/Playground';
 import ChatbotManager from './pages/ChatbotManager';
+import Login from './components/Login';
+import Widget from './pages/Widget';
+import { useAuth } from './contexts/AuthContext';
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
+
+function AppLayout() {
+  return (
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar />
+      <main className="flex-1 p-8 overflow-auto">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('overview');
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'overview':
-        return <Overview />;
-      case 'chats':
-        return <Chats />;
-      case 'integrations':
-        return <Integrations />;
-      case 'playground':
-        return <Playground />;
-      case 'chatbots':
-        return <ChatbotManager />;
-      default:
-        return <Overview />;
-    }
-  };
-
   return (
     <AuthProvider>
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar onNavigate={setCurrentPage} activePage={currentPage} />
-        <main className="ml-16 flex-1 p-8">
-          {renderPage()}
-        </main>
-      </div>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/widget/:botId" element={<Widget />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Overview />} />
+            <Route path="chats" element={<Chats />} />
+            <Route path="integrations" element={<Integrations />} />
+            <Route path="playground" element={<Playground />} />
+            <Route path="chatbot-manager" element={<ChatbotManager />} />
+          </Route>
+        </Routes>
+      </Router>
     </AuthProvider>
   );
 }
