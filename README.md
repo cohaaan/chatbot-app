@@ -95,4 +95,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Project Link: [https://github.com/cohaaan/chatbot-app](https://github.com/cohaaan/chatbot-app)
 
-[Edit in StackBlitz next generation editor ⚡️](https://stackblitz.com/~/github.com/cohaaan/chatbot-app)
